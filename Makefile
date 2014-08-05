@@ -87,15 +87,20 @@ BIN = main.elf
 # building for stm32f407 which is part of the family of chips with similar
 # peripherals, therefore the following is defined
 DEFS    = USE_STDPERIPH_DRIVER $(STM_CHIP_SET)#STM32F429_439xx
-CFLAGS  = -ggdb3 -gdwarf-4 -Wall -ffunction-sections -fdata-sections
+CFLAGS  = -Wall -ffunction-sections -fdata-sections
 CFLAGS += -mlittle-endian -mthumb -mcpu=cortex-m4 -mthumb-interwork
-CFLAGS += -mfloat-abi=hard -mfpu=fpv4-sp-d16 -O0 -dD
+CFLAGS += -mfloat-abi=hard -mfpu=fpv4-sp-d16 -O0
 CFLAGS += $(foreach inc,$(INC),-I$(inc))
 CFLAGS += $(foreach def,$(DEFS),-D$(def))
+# Generate debugging information
+ifeq ($(DEBUG_BUILD),1)
+	CFLAGS += -ggdb3 -gdwarf-4
+endif
 
 LDSCRIPT = STM32F429ZI_FLASH.ld
 LDFLAGS = -T$(LDSCRIPT) -Xlinker
-ifeq ($(DEBUG_BUILD),1)
+# strip out debugging information at link if not debugging
+ifeq ($(DEBUG_BUILD),0)
 	LDFLAGS += --gc-sections
 endif
 
